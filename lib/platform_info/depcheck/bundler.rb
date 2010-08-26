@@ -8,14 +8,14 @@ PlatformInfo::Depcheck.define('bundler >= 0.9.26') do
     if found
       begin
         require 'bundler/version'
-			  if Bundler::VERSION >= '0.9.26'
-			    [true]
-		    else
-		      [false, "only found older version #{Bundler::VERSION}"]
-		    end
-		  rescue LoadError
-		    [false]
-		  end
+        if Bundler::VERSION >= '0.9.26'
+          [true]
+        else
+          [false, "only found older version #{Bundler::VERSION}"]
+        end
+      rescue LoadError
+        [false]
+      end
     else
       [false]
     end
