@@ -42,6 +42,36 @@ module PlatformInfo
   end
   memoize :gem_command
   
+  # Returns the absolute path to the Rake executable that
+  # belongs to the current Ruby interpreter. Returns nil if it
+  # doesn't exist.
+  #
+  # The return value may not be the actual correct invocation
+  # for Rake. Use rake_command for that.
+  def self.rake
+    locate_ruby_executable('rake')
+  end
+  memoize :rake
+  
+  # Returns the correct command string for invoking the Rake executable
+  # that belongs to the current Ruby interpreter. Returns nil if Rake is
+  # not found.
+  def self.rake_command
+    filename = rake
+    # If the Rake executable is a Ruby program then we need to run
+    # it in the correct Ruby interpreter just in case Rake doesn't
+    # have the correct shebang line; we don't want a totally different
+    # Ruby than the current one to be invoked.
+    if filename && is_ruby_program?(filename)
+      "#{ruby_command} #{filename}"
+    else
+      # If it's not a Ruby program then it's probably a wrapper
+      # script as is the case with e.g. RVM (~/.rvm/wrappers).
+      filename
+    end
+  end
+  memoize :rake_command
+  
   # Locate a Ruby tool command, e.g. 'gem', 'rake', 'bundle', etc. Instead of
   # naively looking in $PATH, this function uses a variety of search heuristics
   # to find the command that's really associated with the current Ruby interpreter.
@@ -80,7 +110,7 @@ module PlatformInfo
           shebang = File.open(filename, 'rb') do |f|
             f.readline.strip
           end
-          if shebang == "#!#{ruby}"
+          if shebang == "#!#{ruby_command}"
             # Looks good.
             break
           end
@@ -93,4 +123,14 @@ module PlatformInfo
   
     filename
   end
+
+private
+  def self.is_ruby_program?(filename)
+    File.open(filename, 'rb') do |f|
+      f.readline =~ /ruby/
+    end
+  rescue EOFError
+    false
+  end
+  private_class_method :is_ruby_program?
 end
