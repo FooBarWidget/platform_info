@@ -2,11 +2,34 @@ require 'platform_info'
 require 'rbconfig'
 
 module PlatformInfo
-  # Returns the absolute path to the current Ruby interpreter.
+  # Returns correct command for invoking the current Ruby interpreter.
+  # In case of RVM this function will return the path to the RVM wrapper script
+  # that executes the current Ruby interpreter in the currently active gem set.
   def self.ruby_command
     @@ruby_command ||= begin
-      Config::CONFIG['bindir'] + '/' + Config::CONFIG['RUBY_INSTALL_NAME'] + Config::CONFIG['EXEEXT']
+      filename = ruby_executable
+      if filename =~ %r{(.*)/.rvm/rubies/(.+?)/bin/(.+)}
+        home = $1
+        name = $2
+        exename = $3
+        if !ENV['rvm_gemset_name'].to_s.empty?
+          name << "@#{ENV['rvm_gemset_name']}"
+        end
+        new_filename = "#{home}/.rvm/wrappers/#{name}/#{exename}"
+        if File.exist?(new_filename)
+          filename = new_filename
+        end
+      end
+      filename
     end
+  end
+
+  # Returns the full path to the current Ruby interpreter's executable file.
+  # This might not be the actual correct command to use for invoking the Ruby
+  # interpreter; use ruby_command instead.
+  def self.ruby_executable
+    @@ruby_executable ||=
+      Config::CONFIG['bindir'] + '/' + Config::CONFIG['RUBY_INSTALL_NAME'] + Config::CONFIG['EXEEXT']
   end
   
   # Returns the Ruby engine name. Absolute path to the current Ruby interpreter.
@@ -49,7 +72,7 @@ module PlatformInfo
   # The return value may not be the actual correct invocation
   # for Rake. Use rake_command for that.
   def self.rake
-    locate_ruby_executable('rake')
+    locate_ruby_tool('rake')
   end
   memoize :rake
   
