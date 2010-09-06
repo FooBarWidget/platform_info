@@ -39,6 +39,7 @@ private
       #{variable_name} = nil
       #{check_variable_name} = false
     })
+    line = __LINE__ + 1
     source = %Q{
       def self.#{method}(*args)                                           # def self.httpd(*args)
         if args.empty?                                                    #   if args.empty?
@@ -59,7 +60,7 @@ private
             else                                                          #       else
               #{variable_name} = _unmemoized_#{method}.freeze             #         @@memoized_httpd = _unmemoized_httpd.freeze
               #{check_variable_name} = true                               #         @@has_memoized_httpd = true
-              if #{cache_to_disk}                                         #         if #{cache_to_disk}
+              if cache_file && #{cache_to_disk}                           #         if cache_file && #{cache_to_disk}
                 begin                                                     #           begin
                   if !File.directory?(@@cache_dir)                        #             if !File.directory?(@@cache_dir)
                     Dir.mkdir(@@cache_dir)                                #               Dir.mkdir(@@cache_dir)
@@ -79,7 +80,7 @@ private
         end                                                               #   end
       end                                                                 # end
     }
-    class_eval(source)
+    class_eval(source, __FILE__, line)
   end
   private_class_method :memoize
   
