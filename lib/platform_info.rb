@@ -1,5 +1,8 @@
+# encoding: binary
+
 module PlatformInfo
 private
+  @@memoize = true
   @@cache_dir = nil
   
   def self.private_class_method(name)
@@ -42,7 +45,7 @@ private
     line = __LINE__ + 1
     source = %Q{
       def self.#{method}(*args)                                           # def self.httpd(*args)
-        if args.empty?                                                    #   if args.empty?
+        if @@memoize && args.empty?                                       #   if @@memoize && args.empty?
           if !#{check_variable_name}                                      #     if !@@has_memoized_httpd
             if @@cache_dir                                                #       if @@cache_dir
               cache_file = File.join(@@cache_dir, "#{method}")            #         cache_file = File.join(@@cache_dir, "httpd")
@@ -106,6 +109,14 @@ private
   private_class_method :read_file
 
 public
+  def self.memoize?
+    @@memoize
+  end
+
+  def self.memoize=(enabled)
+    @@memoize = enabled
+  end
+
   def self.cache_dir
     @@cache_dir
   end
