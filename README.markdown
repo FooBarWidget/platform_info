@@ -1,4 +1,5 @@
 = Platform information querying library
+
 `platform_info` provides many functions for querying information about the current platform, such as (but not limited to):
 
  * Information about the currently running Ruby interpreter.
