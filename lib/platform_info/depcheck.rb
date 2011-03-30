@@ -95,18 +95,18 @@ module PlatformInfo
       def check_by_compiling(source, language = :c, cflags = nil, linkflags = nil)
         case language
         when :c
-          source_file    = "/tmp/depcheck-#{$$}.c"
+          source_file    = "#{PlatformInfo.tmpexedir}/depcheck-#{Process.pid}-#{Thread.current.object_id}.c"
           compiler       = "gcc"
           compiler_flags = ENV['CFLAGS']
         when :cxx
-          source_file    = "/tmp/depcheck-#{$$}.cpp"
+          source_file    = "#{PlatformInfo.tmpexedir}/depcheck-#{Process.pid}-#{Thread.current.object_id}.cpp"
           compiler       = "g++"
           compiler_flags = "#{ENV['CFLAGS']} #{ENV['CXXFLAGS']}".strip
         else
           raise ArgumentError, "Unknown language '#{language}"
         end
       
-        output_file = "/tmp/depcheck-#{$$}"
+        output_file = "#{PlatformInfo.tmpexedir}/depcheck-#{Process.pid}-#{Thread.current.object_id}"
       
         begin
           File.open(source_file, 'w') do |f|
