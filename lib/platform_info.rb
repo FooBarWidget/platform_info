@@ -108,6 +108,15 @@ private
   end
   private_class_method :read_file
 
+  def self.rb_config
+    if defined?(::RbConfig)
+      ::RbConfig::CONFIG
+    else
+      ::Config::CONFIG
+    end
+  end
+  private_class_method :rb_config
+
 public
   class RuntimeError < ::RuntimeError
   end
