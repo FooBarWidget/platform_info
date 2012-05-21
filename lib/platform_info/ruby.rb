@@ -128,6 +128,21 @@ module PlatformInfo
   end
   memoize :rake_command
   
+  def self.bundle
+    locate_ruby_tool('bundle')
+  end
+  memoize :bundle
+  
+  def self.bundle_command
+    filename = bundle
+    if filename && is_ruby_program?(filename)
+      "#{ruby_command} #{filename}"
+    else
+      filename
+    end
+  end
+  memoize :bundle_command
+  
   # Returns whether the current Ruby interpreter is managed by RVM.
   def self.in_rvm?
     bindir = Config::CONFIG['bindir']
