@@ -62,7 +62,7 @@ module PlatformInfo
   # interpreter; use ruby_command instead.
   def self.ruby_executable
     @@ruby_executable ||=
-      Config::CONFIG['bindir'] + '/' + Config::CONFIG['RUBY_INSTALL_NAME'] + Config::CONFIG['EXEEXT']
+      rb_config['bindir'] + '/' + rb_config['RUBY_INSTALL_NAME'] + rb_config['EXEEXT']
   end
   
   # Returns the Ruby engine name. Absolute path to the current Ruby interpreter.
@@ -78,7 +78,7 @@ module PlatformInfo
   # Returns the Ruby major and minor version, e.g. "1.8", "1.9".
   def ruby_major_minor_version
     @@ruby_major_minor_version ||= begin
-      Config::CONFIG['MAJOR'] + '.' + Config::CONFIG['MINOR']
+      rb_config['MAJOR'] + '.' + rb_config['MINOR']
     end
   end
   
@@ -89,7 +89,7 @@ module PlatformInfo
     Process.respond_to?(:fork) &&
       ruby_engine != "jruby" &&
       ruby_engine != "macruby" &&
-      Config::CONFIG['target_os'] !~ /mswin|windows|mingw/
+      rb_config['target_os'] !~ /mswin|windows|mingw/
   end
   
   # The correct 'gem' command for the current Ruby interpreter.
@@ -145,7 +145,7 @@ module PlatformInfo
   
   # Returns whether the current Ruby interpreter is managed by RVM.
   def self.in_rvm?
-    bindir = Config::CONFIG['bindir']
+    bindir = rb_config['bindir']
     bindir.include?('/.rvm/') || bindir.include?('/rvm/')
   end
   
@@ -239,7 +239,7 @@ module PlatformInfo
   def self.locate_ruby_tool(name)
     result = locate_ruby_tool_by_basename(name)
     if !result
-      exeext = Config::CONFIG['EXEEXT']
+      exeext = rb_config['EXEEXT']
       exeext = nil if exeext.empty?
       if exeext
         result = locate_ruby_tool_by_basename("#{name}#{exeext}")
@@ -317,7 +317,7 @@ private
   #
   #   transform_according_to_ruby_exec_format("rake")    => "jrake", "rake1.8", etc
   def self.transform_according_to_ruby_exec_format(name)
-    install_name = Config::CONFIG['RUBY_INSTALL_NAME']
+    install_name = rb_config['RUBY_INSTALL_NAME']
     if install_name.include?('ruby')
       format = install_name.sub('ruby', '%s')
       sprintf(format, name)
